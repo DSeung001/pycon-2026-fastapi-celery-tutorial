@@ -1,0 +1,15 @@
+[project]
+name = "pycon-2026-fastapi-celery-tutorial"
+version = "0.1.0"
+description = "Minimal FastAPI + Celery + Redis + FFmpeg HLS tutorial project"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115.0",
+  "uvicorn>=0.30.0",
+  "celery[redis]>=5.4.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+

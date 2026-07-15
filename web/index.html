@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PyCon 2026 Encoding Demo</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 24px;
+        font-family: sans-serif;
+        line-height: 1.5;
+      }
+      button {
+        padding: 8px 12px;
+      }
+      .grid {
+        display: grid;
+        gap: 20px;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      }
+      video {
+        width: 100%;
+        background: #111;
+      }
+      #status {
+        margin-top: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>FastAPI + Celery + FFmpeg HLS (MVP)</h1>
+    <p>기본 입력 파일: <code>/samples/input.mp4</code></p>
+    <button id="start-btn">인코딩 시작</button>
+    <p id="status">상태: 대기 중</p>
+    <div class="grid">
+      <section>
+        <h2>원본 영상</h2>
+        <video controls src="/samples/input.mp4"></video>
+      </section>
+      <section>
+        <h2>HLS 결과</h2>
+        <video id="hls-player" controls></video>
+      </section>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
+    <script type="module" src="/web/player.js"></script>
+  </body>
+</html>
+
