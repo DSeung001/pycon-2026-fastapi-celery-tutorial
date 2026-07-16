@@ -1,0 +1,36 @@
+---
+description: Apply when changing the static tutorial UI, status polling, or HLS playback
+globs: ["static/**/*.html", "static/**/*.js", "static/**/*.css", "templates/**/*.html", "web/**/*.html", "web/**/*.js", "web/**/*.css"]
+alwaysApply: false
+---
+
+# Frontend Rules
+
+The frontend is a small teaching interface, not a production SPA.
+
+## General
+
+- Use plain HTML, CSS, and JavaScript.
+- Do not introduce React, Vue, a bundler, or a design-system dependency unless explicitly requested.
+- Keep UI state transitions visible and easy to explain.
+- Use the API fields exactly as documented in `docs/tutorial-spec.md`.
+
+## Job status polling
+
+- Start polling only after receiving a valid `job_id`.
+- Maintain at most one polling timer for the active job.
+- Stop polling on `SUCCESS` or `FAILURE`.
+- Stop the previous polling loop before starting another job.
+- Handle network and malformed-response errors without an infinite loading state.
+- Disable or guard duplicate submissions while a request is being created.
+- Display `PENDING`, `STARTED`, `SUCCESS`, and `FAILURE` distinctly.
+
+## Source and HLS comparison
+
+- Use the server-provided `source_url`; do not reconstruct storage paths in the browser.
+- Use native HLS playback when `video.canPlayType('application/vnd.apple.mpegurl')` is supported.
+- Otherwise use hls.js when `Hls.isSupported()` is true.
+- Destroy any existing hls.js instance before attaching a new source.
+- Display a clear unsupported-browser message when neither playback path is available.
+- Show the source and encoded result as separate labeled players.
+- Do not attempt to load the HLS player before the job reaches `SUCCESS`.

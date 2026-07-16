@@ -1,0 +1,32 @@
+---
+description: Apply when adding tests, fixing bugs, or validating API, worker, FFmpeg, and Compose behavior
+globs: ["tests/**/*.py", "**/test_*.py", "**/*_test.py", "scripts/**/*.sh", "scripts/**/*.py"]
+alwaysApply: false
+---
+
+# Verification Rules
+
+Use the smallest verification that proves the changed behavior. Do not claim a command passed unless it was actually run.
+
+## Required coverage by behavior
+
+When relevant, verify:
+
+- Upload returns `202` without waiting for encoding.
+- Missing, empty, unsupported, and oversized uploads fail predictably.
+- A stored source file is isolated under its `job_id`.
+- The task is enqueued only after the upload succeeds.
+- Unknown job IDs return `404` rather than indefinite `PENDING`.
+- Status mapping exposes only the documented public states.
+- FFmpeg non-zero exit produces `FAILURE`.
+- Missing `playlist.m3u8` produces `FAILURE` even if the process exits zero.
+- Successful output includes a usable HLS URL.
+- Polling terminates on both success and failure.
+
+## Testing style
+
+- Prefer focused unit tests for path creation, validation, and status mapping.
+- Mock subprocess execution in unit tests; do not require FFmpeg for every test.
+- Keep one documented Docker Compose smoke test for the real end-to-end path.
+- Avoid brittle assertions against full FFmpeg stderr or complete tracebacks.
+- Keep test names descriptive enough to serve as workshop documentation.

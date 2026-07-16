@@ -1,0 +1,77 @@
+---
+description: Apply when changing FastAPI, Celery, Redis, Docker Compose, storage, or FFmpeg code
+globs: ["**/*.py", "**/Dockerfile*", "**/compose*.yml", "**/compose*.yaml", "**/docker-compose*.yml", "**/docker-compose*.yaml"]
+alwaysApply: false
+---
+
+# Backend Rules
+
+Follow the API and storage contracts in `docs/tutorial-spec.md`.
+
+## FastAPI upload flow
+
+The upload endpoint must perform this sequence:
+
+1. Validate the upload metadata and normalized extension.
+2. Generate a UUID `job_id`.
+3. Create the job-specific input directory.
+4. Stream the file to disk in chunks while enforcing the configured size limit.
+5. Reject and clean up empty or oversized uploads.
+6. Enqueue the Celery task only after the source file is stored successfully.
+7. Return HTTP `202 Accepted` immediately.
+
+Additional constraints:
+
+- Do not load the entire video into memory.
+- Do not use the client filename as a directory name or trusted path.
+- Normalize accepted extensions to lowercase and use an allowlist.
+- On enqueue failure, return an appropriate server error and remove incomplete job files when safe.
+- Mount media routes only under the configured tutorial data roots.
+
+## Job status
+
+- Expose only `PENDING`, `STARTED`, `SUCCESS`, and `FAILURE` through the public API.
+- Enable Celery started-state tracking when the tutorial introduces `STARTED`.
+- Treat a Celery `PENDING` result with no matching job input directory as an unknown job and return `404`.
+- Return the documented `hls_url` only after success.
+- Return a concise user-facing error on failure.
+- Keep full tracebacks and FFmpeg stderr in server/worker logs, not in API responses.
+
+## Celery task
+
+- Run FFmpeg only inside the Celery worker.
+- Pass stable generated identifiers and normalized server paths, never uploaded file objects.
+- Create the output directory explicitly.
+- A task must fail when the source is missing, FFmpeg is unavailable, FFmpeg exits non-zero, or the manifest is absent.
+- Do not add automatic retries unless idempotency and duplicate execution are explicitly introduced in the tutorial.
+- Do not swallow exceptions merely to return a successful task result.
+
+## FFmpeg subprocess
+
+- Use `subprocess.run` or `subprocess.Popen` with an argument list.
+- Never use `shell=True`.
+- Use `check=True` or explicitly validate the return code.
+- Capture stderr for diagnostic logging.
+- Keep the initial command deterministic and explainable.
+- Write all generated files inside `data/outputs/{job_id}`.
+- Generate `playlist.m3u8` and predictable segment names.
+- Verify `playlist.m3u8` exists before returning success.
+
+Preferred shape:
+
+```python
+subprocess.run(
+    command,
+    check=True,
+    capture_output=True,
+    text=True,
+)
+```
+
+## Docker Compose
+
+- The API and worker must mount the same host directories to the same container paths.
+- Redis health and service dependencies must be understandable to beginners.
+- Keep service names stable once documented.
+- Avoid host-specific absolute paths.
+- Prefer a single `docker compose up --build` command for the workshop.

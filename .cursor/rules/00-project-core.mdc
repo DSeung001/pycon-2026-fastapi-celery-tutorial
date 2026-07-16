@@ -1,0 +1,40 @@
+---
+description: Core constraints for the PyCon 2026 beginner video-encoding tutorial
+alwaysApply: true
+---
+
+# Project Core Rules
+
+This repository is a beginner-oriented PyCon 2026 hands-on tutorial about moving slow video encoding out of an HTTP request and into a Celery worker.
+
+## Architecture invariants
+
+- FastAPI owns HTTP upload, job creation, job-status responses, and tutorial static files.
+- Redis is the Celery broker and result backend.
+- Celery workers own all FFmpeg execution.
+- FastAPI and Celery must use identical shared-volume paths.
+- Never execute FFmpeg or other long-running encoding work in a FastAPI request handler.
+- Never wait for encoding to finish before returning the job-creation response.
+- Every job must use a UUID `job_id` and isolated input/output directories.
+- Never construct filesystem paths or shell commands directly from an uploaded filename or request value.
+- Never report `SUCCESS` unless the expected HLS manifest exists.
+- Preserve the API contract in `docs/tutorial-spec.md` unless the user explicitly requests a contract change.
+
+## Tutorial design constraints
+
+- Optimize for beginner comprehension, live coding, and recovery during a workshop.
+- Prefer explicit, linear code over generalized abstractions.
+- Make the smallest coherent change needed for the current tutorial step.
+- Keep Docker Compose runnable after meaningful changes.
+- Do not introduce repository, domain, event-bus, plugin, microservice, or generalized media-processing layers.
+- Do not add authentication, cloud storage, databases, adaptive bitrate ladders, distributed queues, or production observability unless explicitly requested.
+- Keep operational concerns documented as extensions rather than silently adding them to the beginner implementation.
+
+## Change discipline
+
+Before editing, inspect the relevant files and preserve the current checkpoint's scope. After editing, report:
+
+1. Files changed.
+2. Behavior changed.
+3. Verification performed.
+4. Any remaining limitation.
