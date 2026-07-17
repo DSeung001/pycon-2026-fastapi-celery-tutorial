@@ -26,6 +26,7 @@ This repository is a beginner-oriented PyCon 2026 hands-on tutorial about moving
 - Prefer explicit, linear code over generalized abstractions.
 - Make the smallest coherent change needed for the current tutorial step.
 - Keep Docker Compose runnable after meaningful changes.
+- Teach two ways to run the tutorial: with the Dockerfile and locally. Docker is for deployment; local is for fast iteration and testing.
 - Do not introduce repository, domain, event-bus, plugin, microservice, or generalized media-processing layers.
 - Do not add authentication, cloud storage, databases, adaptive bitrate ladders, distributed queues, or production observability unless explicitly requested.
 - Keep operational concerns documented as extensions rather than silently adding them to the beginner implementation.

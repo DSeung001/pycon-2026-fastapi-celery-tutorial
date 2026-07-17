@@ -1,0 +1,99 @@
+* {
+    box-sizing: border-box;
+  }
+  
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: system-ui, -apple-system, sans-serif;
+    background: #f4f6f8;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem;
+  }
+  
+  h1 {
+    margin: 0 0 0.5rem;
+    font-size: 1.5rem;
+  }
+  
+  .subtitle {
+    margin: 0 0 1.5rem;
+    color: #555;
+    font-size: 0.95rem;
+  }
+  
+  .card {
+    background: #fff;
+    border: 1px solid #e2e6ea;
+    border-radius: 10px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+  }
+  
+  input[type="file"] {
+    flex: 1;
+    min-width: 200px;
+    font-size: 0.9rem;
+  }
+  
+  button {
+    padding: 0.55rem 1.1rem;
+    border: none;
+    border-radius: 8px;
+    background: #2563eb;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background: #1d4ed8;
+  }
+  
+  button:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+  }
+  
+  #result {
+    margin: 0;
+    padding: 1rem;
+    background: #0f172a;
+    color: #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    overflow-x: auto;
+    min-height: 4rem;
+  }
+  
+  #result:empty::before {
+    content: "업로드 결과가 여기에 표시됩니다.";
+    color: #64748b;
+  }
+  
+  video {
+    width: 100%;
+    max-width: 640px;
+    border-radius: 8px;
+    background: #000;
+  }
+  
+  .label {
+    margin: 0 0 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #334155;
+  }
