@@ -3,14 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <title>PyCon 2026 Video Tutorial</title>
-  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
-  <h1>영상 업로드</h1>
-  <input type="file" id="file" accept="video/*" />
-  <button id="upload">업로드</button>
-  <pre id="result"></pre>
-  <video id="source" controls width="640" hidden></video>
+  <main>
+    <h1>영상 업로드</h1>
+    <input type="file" id="file" accept="video/*" />
+    <button id="upload">업로드</button>
+    <pre id="result" hidden></pre>
+    <video id="source" controls hidden></video>
+  </main>
 
   <script>
     document.getElementById("upload").onclick = async () => {
@@ -20,10 +22,14 @@
       const form = new FormData();
       form.append("file", file);
 
+      // API 동기 요청
       const res = await fetch("/api/videos", { method: "POST", body: form });
       const data = await res.json();
-      document.getElementById("result").textContent = JSON.stringify(data, null, 2);
+      const result = document.getElementById("result");
+      result.textContent = JSON.stringify(data, null, 2);
+      result.hidden = false;
 
+      // 성공 후 표시
       if (res.ok && data.source_url) {
         const video = document.getElementById("source");
         video.src = data.source_url;

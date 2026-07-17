@@ -1,9 +1,19 @@
 import uuid
 from pathlib import Path
+
 from fastapi import APIRouter, File, HTTPException, UploadFile
-from app.config import ALLOWED_EXTENSIONS, INPUTS_DIR, MAX_UPLOAD_BYTES, CHUNK_SIZE, SOURCE_BASENAME, MEDIA_INPUTS_URL
+
+from app.config import (
+    ALLOWED_EXTENSIONS,
+    CHUNK_SIZE,
+    INPUTS_DIR,
+    MAX_UPLOAD_BYTES,
+    MEDIA_INPUTS_URL,
+    SOURCE_BASENAME,
+)
 
 router = APIRouter()
+
 
 @router.post("/videos", status_code=201)
 async def upload_video(file: UploadFile = File(...)):
@@ -21,8 +31,7 @@ async def upload_video(file: UploadFile = File(...)):
     job_dir = INPUTS_DIR / job_id
     job_dir.mkdir(parents=True, exist_ok=True)
     dest = job_dir / f"{SOURCE_BASENAME}.{ext}"
-    
-   
+
     # 파일 저장
     total = 0
     try:

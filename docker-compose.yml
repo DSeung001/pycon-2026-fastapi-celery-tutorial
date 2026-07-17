@@ -1,23 +1,23 @@
-# 서비스 목록 
+# 서비스 목록
 services:
 
-  # 서비스 명가 API
-  api: 
-    build: ./api # ./api/Dockerfile 를 빌드
+  # FastAPI 서비스
+  api:
+    build: ./api # ./api/Dockerfile 빌드
     ports:
       - "8000:8000"
 
     # 환경변수
     environment:
       DATA_ROOT: /data
-      MAX_UPLOAD_BYTES: "104857600"   # 100MB in bytes
+      MAX_UPLOAD_BYTES: "104857600" # 100MB
       ALLOWED_EXTENSIONS: "mp4,mov,webm"
-    
+
     # 볼륨 마운트
     # 도커 컨테이너 안의 폴더와 내 PC의 폴더를 연결해 줘서 이 폴더를 영구적으로 보존할 수 있게 해줌
     volumes:
       - ./data:/data
       - ./static:/app/static:ro
 
-    # 실행시 동작할 명령어
+    # 실행 시 동작할 명령어
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
