@@ -10,12 +10,32 @@ main {
 }
 
 #result,
+#status,
 video {
   width: 100%;
   margin-top: 20px;
 }
 
-#result {
+h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.status-header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+#poll-meta {
+  color: #666;
+  font-size: 0.9rem;
+  font-family: monospace;
+}
+
+#result,
+#status {
   box-sizing: border-box;
   min-height: 100px;
   padding: 16px;

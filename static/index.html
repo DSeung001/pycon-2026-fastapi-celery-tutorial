@@ -11,29 +11,90 @@
     <input type="file" id="file" accept="video/*" />
     <button id="upload">업로드</button>
     <pre id="result" hidden></pre>
+    <div class="status-header">
+      <h2>작업 상태</h2>
+      <span id="poll-meta"></span>
+    </div>
+    <pre id="status">업로드 후 여기에 표시됩니다.</pre>
     <video id="source" controls hidden></video>
   </main>
 
   <script>
+    const POLL_INTERVAL_MS = 1500;
+    let pollTimer = null;
+    let pollCount = 0;
+
+    function stopPolling() {
+      if (pollTimer !== null) {
+        clearInterval(pollTimer);
+        pollTimer = null;
+      }
+    }
+
+    function showPollMeta() {
+      const intervalSec = (POLL_INTERVAL_MS / 1000).toFixed(1);
+      document.getElementById("poll-meta").textContent =
+        `폴링 ${pollCount}회 · ${intervalSec}초 간격`;
+    }
+
+    function showStatus(data) {
+      document.getElementById("status").textContent =
+        JSON.stringify(data, null, 2);
+    }
+
+    function startPolling(statusUrl) {
+      stopPolling();
+      pollCount = 0;
+      showPollMeta();
+
+      const tick = async () => {
+        try {
+          const res = await fetch(statusUrl);
+          const data = await res.json();
+          pollCount += 1;
+          showPollMeta();
+          showStatus(data);
+          if (data.status === "SUCCESS" || data.status === "FAILURE") {
+            stopPolling();
+          }
+        } catch (err) {
+          pollCount += 1;
+          showPollMeta();
+          showStatus({ error: String(err) });
+          stopPolling();
+        }
+      };
+      tick();
+      pollTimer = setInterval(tick, POLL_INTERVAL_MS);
+    }
+
     document.getElementById("upload").onclick = async () => {
       const file = document.getElementById("file").files[0];
       if (!file) return alert("파일을 선택하세요");
 
+      stopPolling();
+      document.getElementById("poll-meta").textContent = "";
+      showStatus({ status: "업로드 중..." });
+
       const form = new FormData();
       form.append("file", file);
 
-      // API 동기 요청
       const res = await fetch("/api/videos", { method: "POST", body: form });
       const data = await res.json();
       const result = document.getElementById("result");
       result.textContent = JSON.stringify(data, null, 2);
       result.hidden = false;
 
-      // 성공 후 표시
       if (res.ok && data.source_url) {
         const video = document.getElementById("source");
         video.src = data.source_url;
         video.hidden = false;
+      }
+
+      if (res.ok && data.status_url) {
+        startPolling(data.status_url);
+      } else {
+        showStatus(data);
       }
     };
   </script>
