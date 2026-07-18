@@ -18,8 +18,8 @@ from app.celery_client import celery
 
 router = APIRouter()
 
-
-@router.post("/videos", status_code=201)
+# 202로 요청 수행 중임을 명시
+@router.post("/videos", status_code=202)
 async def upload_video(file: UploadFile = File(...)):
     # 파일 체크
     if not file.filename:

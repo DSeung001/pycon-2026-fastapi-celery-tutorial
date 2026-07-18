@@ -18,6 +18,9 @@ services:
   # FastAPI 서비스
   api:
     build: ./api # ./api/Dockerfile 빌드
+    depends_on:
+      redis:
+        condition: service_healthy
     ports:
       - "8000:8000"
 
