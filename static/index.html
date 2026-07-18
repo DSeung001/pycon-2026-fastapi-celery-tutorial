@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>PyCon 2026 Video Tutorial</title>
   <link rel="stylesheet" href="/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.7/dist/hls.min.js"></script>
 </head>
 <body>
   <main>
@@ -13,21 +14,63 @@
     <pre id="result" hidden></pre>
     <div class="status-header">
       <h2>작업 상태</h2>
+      <span id="status-label"></span>
       <span id="poll-meta"></span>
     </div>
     <pre id="status">업로드 후 여기에 표시됩니다.</pre>
-    <video id="source" controls hidden></video>
+    <div class="players">
+      <div class="player">
+        <h3>원본</h3>
+        <video id="source" controls hidden></video>
+      </div>
+      <div class="player">
+        <h3>HLS 결과</h3>
+        <video id="hls" controls hidden></video>
+        <p id="hls-error" hidden></p>
+      </div>
+    </div>
   </main>
 
   <script>
     const POLL_INTERVAL_MS = 1500;
     let pollTimer = null;
     let pollCount = 0;
+    let hls = null;
 
     function stopPolling() {
       if (pollTimer !== null) {
         clearInterval(pollTimer);
         pollTimer = null;
+      }
+    }
+
+    function destroyHls() {
+      if (hls) {
+        hls.destroy();
+        hls = null;
+      }
+      const v = document.getElementById("hls");
+      v.removeAttribute("src");
+      v.load();
+    }
+
+    function playHls(url) {
+      destroyHls();
+      const video = document.getElementById("hls");
+      const err = document.getElementById("hls-error");
+      err.hidden = true;
+      video.hidden = false;
+
+      if (video.canPlayType("application/vnd.apple.mpegurl")) {
+        video.src = url;
+      } else if (window.Hls && Hls.isSupported()) {
+        hls = new Hls();
+        hls.loadSource(url);
+        hls.attachMedia(video);
+      } else {
+        video.hidden = true;
+        err.hidden = false;
+        err.textContent = "이 브라우저는 HLS 재생을 지원하지 않습니다.";
       }
     }
 
@@ -37,9 +80,18 @@
         `폴링 ${pollCount}회 · ${intervalSec}초 간격`;
     }
 
+    function showStatusLabel(status) {
+      const el = document.getElementById("status-label");
+      el.textContent = status || "";
+      el.className = status ? `status-${status}` : "";
+    }
+
     function showStatus(data) {
       document.getElementById("status").textContent =
         JSON.stringify(data, null, 2);
+      if (data && data.status) {
+        showStatusLabel(data.status);
+      }
     }
 
     function startPolling(statusUrl) {
@@ -54,6 +106,9 @@
           pollCount += 1;
           showPollMeta();
           showStatus(data);
+          if (data.status === "SUCCESS" && data.hls_url) {
+            playHls(data.hls_url);
+          }
           if (data.status === "SUCCESS" || data.status === "FAILURE") {
             stopPolling();
           }
@@ -72,29 +127,40 @@
       const file = document.getElementById("file").files[0];
       if (!file) return alert("파일을 선택하세요");
 
-      stopPolling();
-      document.getElementById("poll-meta").textContent = "";
-      showStatus({ status: "업로드 중..." });
+      const uploadBtn = document.getElementById("upload");
+      uploadBtn.disabled = true;
 
-      const form = new FormData();
-      form.append("file", file);
+      try {
+        stopPolling();
+        destroyHls();
+        document.getElementById("hls").hidden = true;
+        document.getElementById("hls-error").hidden = true;
+        document.getElementById("poll-meta").textContent = "";
+        showStatusLabel("");
+        showStatus({ status: "업로드 중..." });
 
-      const res = await fetch("/api/videos", { method: "POST", body: form });
-      const data = await res.json();
-      const result = document.getElementById("result");
-      result.textContent = JSON.stringify(data, null, 2);
-      result.hidden = false;
+        const form = new FormData();
+        form.append("file", file);
 
-      if (res.ok && data.source_url) {
-        const video = document.getElementById("source");
-        video.src = data.source_url;
-        video.hidden = false;
-      }
+        const res = await fetch("/api/videos", { method: "POST", body: form });
+        const data = await res.json();
+        const result = document.getElementById("result");
+        result.textContent = JSON.stringify(data, null, 2);
+        result.hidden = false;
 
-      if (res.ok && data.status_url) {
-        startPolling(data.status_url);
-      } else {
-        showStatus(data);
+        if (res.ok && data.source_url) {
+          const video = document.getElementById("source");
+          video.src = data.source_url;
+          video.hidden = false;
+        }
+
+        if (res.ok && data.status_url) {
+          startPolling(data.status_url);
+        } else {
+          showStatus(data);
+        }
+      } finally {
+        uploadBtn.disabled = false;
       }
     };
   </script>
