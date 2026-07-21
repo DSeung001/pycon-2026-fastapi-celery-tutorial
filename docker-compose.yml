@@ -1,8 +1,9 @@
 # 서비스 목록
 services:
 
-  # Redis 서비스
+  # Redis 서비스 (profile celery — early tip에서는 plain up 시 미기동)
   redis:
+    profiles: ["celery"]
     image: redis:7-alpine
     # 포트 포워딩
     ports:
@@ -21,6 +22,7 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+        required: false
     ports:
       - "8000:8000"
 
@@ -40,8 +42,9 @@ services:
     # 실행 시 동작할 명령어
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
-  # Celery 워커, 별도 프로세스
+  # Celery 워커 (profile celery)
   worker:
+    profiles: ["celery"]
     build: ./worker
     environment:
       DATA_ROOT: /data
@@ -54,6 +57,3 @@ services:
         condition: service_healthy
     # 실행 파일 지정 및 로그 레벨 설정
     command: celery -A app.celery_app.celery worker --loglevel=info
-
-
-
