@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
 
+APP_TITLE = "Pycon 2026 Video Converter"
+
 # 경로 설정
 DATA_ROOT = Path(os.getenv("DATA_ROOT", "/data"))
 INPUTS_DIR = DATA_ROOT / "inputs"
@@ -25,3 +27,7 @@ ALLOWED_EXTENSIONS = {
 # 미디어(클라이언트에서 접근 가능) 경로 설정
 MEDIA_INPUTS_URL = "/media/inputs"
 MEDIA_OUTPUTS_URL = "/media/outputs"
+
+# Celery 설정
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+ENCODE_TASK = "encode_video"
