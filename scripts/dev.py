@@ -61,12 +61,12 @@ def install() -> None:
 
 
 def redis() -> None:
-    """로컬용 Redis만 Docker로 기동"""
+    """로컬용 Redis만 Docker로 기동 (compose profile celery)"""
     if not compose_has_service("redis"):
         print("이 체크포인트의 docker-compose.yml에 redis 서비스가 없습니다.")
         print("checkpoint/02-celery-redis 이후에서 사용하세요.")
         sys.exit(1)
-    run(["docker", "compose", "up", "-d", "redis"])
+    run(["docker", "compose", "--profile", "celery", "up", "-d", "redis"])
 
 
 def api() -> None:
@@ -109,8 +109,11 @@ def worker() -> None:
 
 
 def docker() -> None:
-    """전체 스택 (브랜치의 docker-compose.yml 기준)"""
-    run(["docker", "compose", "up", "--build"])
+    """Compose 기동. worker/app이 있으면 celery profile(redis·worker) 포함."""
+    if (WORKER_DIR / "app").exists():
+        run(["docker", "compose", "--profile", "celery", "up", "--build"])
+    else:
+        run(["docker", "compose", "up", "--build"])
 
 
 def main() -> None:
