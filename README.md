@@ -8,6 +8,25 @@ python scripts/dev.py docker
 
 브라우저: http://localhost:8000
 
+## 체크포인트 실습
+
+환경은 미리 세팅된 상태로 두고, 막히면 해당 체크포인트 브랜치로 이동해 이어서 진행합니다.
+
+```bash
+git fetch origin
+git switch checkpoint/01-fastapi-upload
+python scripts/dev.py docker
+```
+
+| 브랜치 | 학습 내용 | 성공 기준 |
+|--------|-----------|-----------|
+| `checkpoint/01-fastapi-upload` | FastAPI 업로드와 원본 저장 | `job_id`와 `data/inputs/{job_id}/` 확인 |
+| `checkpoint/02-celery-redis` | Redis enqueue와 상태 조회 | `PENDING` → `SUCCESS`, worker 로그 확인 |
+| `checkpoint/03-ffmpeg-hls` | worker FFmpeg HLS 인코딩 | `playlist.m3u8`와 `hls_url` 확인 |
+| `checkpoint/04-hls-player` | polling과 원본/결과 재생 | 브라우저에서 HLS 재생 |
+
+완성본은 `main`과 `checkpoint/04-hls-player`입니다.
+
 ## 로컬 실행
 
 로컬에서 API·worker를 나눠 돌릴 때는 **호스트에 FFmpeg 설치가 필요**합니다.
