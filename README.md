@@ -1,6 +1,32 @@
-## 실행 (권장: Docker)
+## 환경 세팅
 
-Docker로 돌리면 FFmpeg를 호스트에 설치할 필요가 없습니다. worker 이미지에 포함되어 있습니다.
+권장 실행은 Docker입니다. 아래만 있으면 `python scripts/dev.py docker`로 프로젝트를 돌릴 수 있습니다.
+
+| 항목 | 용도 | 설치 |
+|------|------|------|
+| Docker Desktop | API · Redis · worker 실행 (Compose 포함) | [Docker Desktop](https://www.docker.com/products/docker-desktop/) |
+| Python 3.13 | `scripts/dev.py` 헬퍼 실행 | [Python 3.13.0](https://www.python.org/downloads/release/python-3130/) |
+| Git | 저장소 clone · 체크포인트 브랜치 이동 | OS별 Git |
+
+설치 확인:
+
+```bash
+docker --version
+docker compose version
+python --version   # 3.13.x
+git --version
+```
+
+저장소 받기:
+
+```bash
+git clone https://github.com/DSeung001/pycon-2026-fastapi-celery-tutorial.git
+cd pycon-2026-fastapi-celery-tutorial
+```
+
+Docker 경로에서는 호스트에 FFmpeg·Redis를 따로 설치할 필요가 없습니다. (이미지에 포함)
+
+## 실행 (권장: Docker)
 
 ```bash
 python scripts/dev.py docker

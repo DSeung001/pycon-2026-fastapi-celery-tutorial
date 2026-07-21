@@ -17,9 +17,13 @@ Audience:
 Prerequisites:
 
 - Laptop capable of running Docker.
-- Docker and Docker Compose.
+- Docker Desktop (Docker Compose included).
+- Python 3.13 on the host for `scripts/dev.py` (container images also use Python 3.13).
+- Git for clone and checkpoint branches.
 - `curl` or an equivalent HTTP client.
 - A modern browser.
+
+Setup (recommended Docker path): install Docker Desktop, Python 3.13, and Git; clone the repo; run `python scripts/dev.py docker`. Host FFmpeg/Redis are not required when using Docker.
 
 ## 3. Learning outcomes
 
