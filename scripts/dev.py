@@ -11,6 +11,7 @@ WORKER_REQUIREMENTS = PROJECT_ROOT / "worker" / "requirements.txt"
 DATA_ROOT = PROJECT_ROOT / "data"
 WORKER_DIR = PROJECT_ROOT / "worker"
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+COMPOSE_FILE = PROJECT_ROOT / "docker-compose.yml"
 
 
 def run(command: list[str], *, env=None, cwd: Path | None = None) -> None:
@@ -38,20 +39,33 @@ def local_env() -> dict[str, str]:
     }
 
 
+def compose_has_service(service: str) -> bool:
+    if not COMPOSE_FILE.exists():
+        return False
+    return f"{service}:" in COMPOSE_FILE.read_text(encoding="utf-8")
+
+
 def install() -> None:
-    """api + worker 의존성을 하나의 .venv에 설치"""
+    """api + (있으면) worker 의존성을 하나의 .venv에 설치"""
     if not VENV_DIR.exists():
         print("가상환경을 생성합니다.")
         run([sys.executable, "-m", "venv", VENV_DIR])
 
     py = get_venv_python()
     run([py, "-m", "pip", "install", "-r", API_REQUIREMENTS])
-    run([py, "-m", "pip", "install", "-r", WORKER_REQUIREMENTS])
+    if WORKER_REQUIREMENTS.exists():
+        run([py, "-m", "pip", "install", "-r", WORKER_REQUIREMENTS])
+    else:
+        print("worker/requirements.txt가 없어 worker 의존성 설치를 건너뜁니다.")
     DATA_ROOT.mkdir(parents=True, exist_ok=True)
 
 
 def redis() -> None:
     """로컬용 Redis만 Docker로 기동"""
+    if not compose_has_service("redis"):
+        print("이 체크포인트의 docker-compose.yml에 redis 서비스가 없습니다.")
+        print("checkpoint/02-celery-redis 이후에서 사용하세요.")
+        sys.exit(1)
     run(["docker", "compose", "up", "-d", "redis"])
 
 
@@ -74,6 +88,10 @@ def api() -> None:
 
 def worker() -> None:
     """Celery worker (로컬, cwd=worker/)"""
+    if not (WORKER_DIR / "app").exists():
+        print("worker/ 앱이 아직 없습니다.")
+        print("checkpoint/02-celery-redis 이후에서 사용하세요.")
+        sys.exit(1)
     install()
     run(
         [
@@ -91,7 +109,7 @@ def worker() -> None:
 
 
 def docker() -> None:
-    """전체 스택 (api + redis + worker)"""
+    """전체 스택 (브랜치의 docker-compose.yml 기준)"""
     run(["docker", "compose", "up", "--build"])
 
 
