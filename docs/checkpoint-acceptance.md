@@ -20,6 +20,7 @@ Expected concept: bringing up a minimal FastAPI app and confirming the toolchain
 - [ ] `GET /api/health` returns `{"status":"ok"}`.
 - [ ] Swagger UI is reachable at `/docs`.
 - [ ] The participant flow does not require upload, Redis, Celery, or FFmpeg.
+- [ ] `api/app/config.py` defines the full workshop constants, including values not used until later checkpoints.
 
 Suggested verification:
 
