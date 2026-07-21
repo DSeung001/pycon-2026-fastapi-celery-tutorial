@@ -25,7 +25,3 @@ ALLOWED_EXTENSIONS = {
 # 미디어(클라이언트에서 접근 가능) 경로 설정
 MEDIA_INPUTS_URL = "/media/inputs"
 MEDIA_OUTPUTS_URL = "/media/outputs"
-
-# Celery 설정₩
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
-ENCODE_TASK = "encode_video"

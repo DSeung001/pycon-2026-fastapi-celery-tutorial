@@ -8,112 +8,31 @@
 <body>
   <main>
     <h1>영상 업로드</h1>
-    <p class="hint">Checkpoint 02: Redis와 Celery로 작업을 enqueue하고 상태를 확인합니다.</p>
+    <p class="hint">Checkpoint 01: FastAPI로 영상을 받아 저장합니다.</p>
     <input type="file" id="file" accept="video/*" />
     <button id="upload">업로드</button>
     <pre id="result" hidden></pre>
-    <div class="status-header">
-      <h2>작업 상태</h2>
-      <span id="status-label"></span>
-      <span id="poll-meta"></span>
-    </div>
-    <pre id="status">업로드 후 여기에 표시됩니다.</pre>
     <video id="source" controls hidden></video>
   </main>
 
   <script>
-    const POLL_INTERVAL_MS = 1500;
-    let pollTimer = null;
-    let pollCount = 0;
-
-    function stopPolling() {
-      if (pollTimer !== null) {
-        clearInterval(pollTimer);
-        pollTimer = null;
-      }
-    }
-
-    function showPollMeta() {
-      const intervalSec = (POLL_INTERVAL_MS / 1000).toFixed(1);
-      document.getElementById("poll-meta").textContent =
-        `폴링 ${pollCount}회 / ${intervalSec}초 간격`;
-    }
-
-    function showStatusLabel(status) {
-      const el = document.getElementById("status-label");
-      el.textContent = status || "";
-      el.className = status ? `status-${status}` : "";
-    }
-
-    function showStatus(data) {
-      document.getElementById("status").textContent =
-        JSON.stringify(data, null, 2);
-      if (data && data.status) {
-        showStatusLabel(data.status);
-      }
-    }
-
-    function startPolling(statusUrl) {
-      stopPolling();
-      pollCount = 0;
-      showPollMeta();
-
-      const tick = async () => {
-        try {
-          const res = await fetch(statusUrl);
-          const data = await res.json();
-          pollCount += 1;
-          showPollMeta();
-          showStatus(data);
-          if (data.status === "SUCCESS" || data.status === "FAILURE") {
-            stopPolling();
-          }
-        } catch (err) {
-          pollCount += 1;
-          showPollMeta();
-          showStatus({ error: String(err) });
-          stopPolling();
-        }
-      };
-      tick();
-      pollTimer = setInterval(tick, POLL_INTERVAL_MS);
-    }
-
     document.getElementById("upload").onclick = async () => {
       const file = document.getElementById("file").files[0];
       if (!file) return alert("파일을 선택하세요");
 
-      const uploadBtn = document.getElementById("upload");
-      uploadBtn.disabled = true;
+      const form = new FormData();
+      form.append("file", file);
 
-      try {
-        stopPolling();
-        document.getElementById("poll-meta").textContent = "";
-        showStatusLabel("");
-        showStatus({ status: "업로드 중..." });
+      const res = await fetch("/api/videos", { method: "POST", body: form });
+      const data = await res.json();
+      const result = document.getElementById("result");
+      result.textContent = JSON.stringify(data, null, 2);
+      result.hidden = false;
 
-        const form = new FormData();
-        form.append("file", file);
-
-        const res = await fetch("/api/videos", { method: "POST", body: form });
-        const data = await res.json();
-        const result = document.getElementById("result");
-        result.textContent = JSON.stringify(data, null, 2);
-        result.hidden = false;
-
-        if (res.ok && data.source_url) {
-          const video = document.getElementById("source");
-          video.src = data.source_url;
-          video.hidden = false;
-        }
-
-        if (res.ok && data.status_url) {
-          startPolling(data.status_url);
-        } else {
-          showStatus(data);
-        }
-      } finally {
-        uploadBtn.disabled = false;
+      if (res.ok && data.source_url) {
+        const video = document.getElementById("source");
+        video.src = data.source_url;
+        video.hidden = false;
       }
     };
   </script>

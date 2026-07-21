@@ -10,15 +10,12 @@ from app.config import (
     MAX_UPLOAD_BYTES,
     MEDIA_INPUTS_URL,
     SOURCE_BASENAME,
-    ENCODE_TASK,
 )
-
-from app.celery_client import celery
 
 router = APIRouter()
 
 
-@router.post("/videos", status_code=202)
+@router.post("/videos", status_code=201)
 async def upload_video(file: UploadFile = File(...)):
     if not file.filename:
         raise HTTPException(400, "Missing file")
@@ -51,47 +48,8 @@ async def upload_video(file: UploadFile = File(...)):
         job_dir.rmdir()
         raise HTTPException(400, "Empty file")
 
-    try:
-        celery.send_task(
-            ENCODE_TASK,
-            args=[job_id, ext],
-            task_id=job_id,
-        )
-    except Exception:
-        dest.unlink(missing_ok=True)
-        job_dir.rmdir()
-        raise HTTPException(500, "Failed to enqueue job")
-
     source_url = f"{MEDIA_INPUTS_URL}/{job_id}/{SOURCE_BASENAME}.{ext}"
     return {
         "job_id": job_id,
-        "status": "PENDING",
-        "status_url": f"/api/jobs/{job_id}",
         "source_url": source_url,
     }
-
-
-@router.get("/jobs/{job_id}")
-def get_job(job_id: str):
-    job_dir = INPUTS_DIR / job_id
-    if not job_dir.exists():
-        raise HTTPException(404, "Job not found")
-
-    sources: list[Path] = list(job_dir.glob(f"{SOURCE_BASENAME}.*"))
-    if not sources:
-        raise HTTPException(404, "Unknown job")
-    ext = sources[0].suffix.lstrip(".")
-    source_url = f"{MEDIA_INPUTS_URL}/{job_id}/{SOURCE_BASENAME}.{ext}"
-
-    result = celery.AsyncResult(job_id)
-    status = result.state
-
-    response = {
-        "job_id": job_id,
-        "status": status,
-        "source_url": source_url,
-    }
-
-    if status == "FAILURE":
-        response["error"] = "Background task failed"
-    return response

@@ -15,55 +15,12 @@ main {
 }
 
 #result,
-#status,
 video {
   width: 100%;
   margin-top: 20px;
 }
 
-h2 {
-  margin: 0;
-  font-size: 1.1rem;
-}
-
-.status-header {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  margin-top: 32px;
-  flex-wrap: wrap;
-}
-
-#poll-meta {
-  color: #666;
-  font-size: 0.9rem;
-  font-family: monospace;
-}
-
-#status-label {
-  font-family: monospace;
-  font-weight: 600;
-  font-size: 0.95rem;
-}
-
-#status-label.status-PENDING {
-  color: #666;
-}
-
-#status-label.status-STARTED {
-  color: #1565c0;
-}
-
-#status-label.status-SUCCESS {
-  color: #2e7d32;
-}
-
-#status-label.status-FAILURE {
-  color: #c62828;
-}
-
-#result,
-#status {
+#result {
   box-sizing: border-box;
   min-height: 100px;
   padding: 16px;
