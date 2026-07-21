@@ -24,7 +24,17 @@ python scripts/dev.py docker
 | `checkpoint/01-fastapi-upload` | FastAPI 업로드와 원본 저장 | `job_id`와 `data/inputs/{job_id}/` 확인 |
 | `checkpoint/02-celery-redis` | Redis enqueue와 상태 조회 | `PENDING` → `SUCCESS`, worker 로그 확인 |
 | `checkpoint/03-ffmpeg-hls` | worker FFmpeg HLS 인코딩 | `playlist.m3u8`와 `hls_url` 확인 |
-| `checkpoint/04-hls-player` | polling과 원본/결과 재생 | 브라우저에서 HLS 재생 |
+| `checkpoint/04-hls-player` | HLS 플레이어(프론트는 제공 코드 사용) | 브라우저에서 HLS 재생 |
+
+Checkpoint 04의 `static/`(HTML/CSS/JS)은 직접 작성하지 않습니다. 브랜치를 받거나 GitHub에서 확인하세요.
+
+- 저장소: https://github.com/DSeung001/pycon-2026-fastapi-celery-tutorial
+- 플레이어 파일: https://github.com/DSeung001/pycon-2026-fastapi-celery-tutorial/tree/checkpoint/04-hls-player/static
+
+```bash
+git fetch origin
+git switch checkpoint/04-hls-player
+```
 
 완성본은 `main`과 `checkpoint/04-hls-player`입니다.
 

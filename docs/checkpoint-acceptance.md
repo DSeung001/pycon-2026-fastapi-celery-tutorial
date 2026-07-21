@@ -90,6 +90,9 @@ curl -s http://localhost:8000/api/jobs/<job_id>
 
 Expected concept: polling an asynchronous job and consuming its result.
 
+Workshop note: participants should use the provided `static/` from this branch (or GitHub), not hand-write the HLS player UI.
+Repo: https://github.com/DSeung001/pycon-2026-fastapi-celery-tutorial/tree/checkpoint/04-hls-player/static
+
 - [ ] The browser starts one polling loop for the active job.
 - [ ] Polling stops on both `SUCCESS` and `FAILURE`.
 - [ ] A new job does not leave the old polling timer active.
