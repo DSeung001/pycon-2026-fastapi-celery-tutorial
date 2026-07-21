@@ -74,9 +74,3 @@ h2 {
   white-space: pre-wrap;
   overflow-x: auto;
 }
-
-#hls-hint {
-  margin-top: 16px;
-  color: #2e7d32;
-  font-family: monospace;
-}

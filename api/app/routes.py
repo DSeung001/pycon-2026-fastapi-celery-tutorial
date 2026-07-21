@@ -9,7 +9,6 @@ from app.config import (
     INPUTS_DIR,
     MAX_UPLOAD_BYTES,
     MEDIA_INPUTS_URL,
-    MEDIA_OUTPUTS_URL,
     SOURCE_BASENAME,
     ENCODE_TASK,
 )
@@ -18,25 +17,21 @@ from app.celery_client import celery
 
 router = APIRouter()
 
-# 202로 요청 수행 중임을 명시
+
 @router.post("/videos", status_code=202)
 async def upload_video(file: UploadFile = File(...)):
-    # 파일 체크
     if not file.filename:
         raise HTTPException(400, "Missing file")
 
-    # 파일 확장자 체크
     ext = Path(file.filename).suffix.lstrip(".").lower()
     if ext not in ALLOWED_EXTENSIONS:
         raise HTTPException(400, f"Unsupported extension: {ext}")
 
-    # 폴더 생성
     job_id = str(uuid.uuid4())
     job_dir = INPUTS_DIR / job_id
     job_dir.mkdir(parents=True, exist_ok=True)
     dest = job_dir / f"{SOURCE_BASENAME}.{ext}"
 
-    # 파일 저장
     total = 0
     try:
         with dest.open("wb") as out:
@@ -46,7 +41,6 @@ async def upload_video(file: UploadFile = File(...)):
                     raise HTTPException(413, "Upload too large")
                 out.write(chunk)
     except Exception:
-        # 부분 저장 정리
         if dest.exists():
             dest.unlink()
         job_dir.rmdir()
@@ -57,45 +51,40 @@ async def upload_video(file: UploadFile = File(...)):
         job_dir.rmdir()
         raise HTTPException(400, "Empty file")
 
-    # Celery 작업 등록
-    try: 
+    try:
         celery.send_task(
             ENCODE_TASK,
             args=[job_id, ext],
-            task_id=job_id, 
+            task_id=job_id,
         )
     except Exception:
-        # 작업 등록 실패 시 파일 삭제
         dest.unlink(missing_ok=True)
         job_dir.rmdir()
         raise HTTPException(500, "Failed to enqueue job")
 
     source_url = f"{MEDIA_INPUTS_URL}/{job_id}/{SOURCE_BASENAME}.{ext}"
-    # celery 작업만 등록하고 반환
     return {
         "job_id": job_id,
-        "status": "PENDING",        
-        "status_url": f"/api/jobs/{job_id}", # 작업 상태 조회 경로
-        "source_url": source_url, # 원본 미디어 경로
+        "status": "PENDING",
+        "status_url": f"/api/jobs/{job_id}",
+        "source_url": source_url,
     }
 
-# 작업 가져오기
+
 @router.get("/jobs/{job_id}")
 def get_job(job_id: str):
     job_dir = INPUTS_DIR / job_id
     if not job_dir.exists():
-        raise HTTPException(404, "Job not found")   
-    
-    # 원본 파일 조회
+        raise HTTPException(404, "Job not found")
+
     sources: list[Path] = list(job_dir.glob(f"{SOURCE_BASENAME}.*"))
     if not sources:
         raise HTTPException(404, "Unknown job")
     ext = sources[0].suffix.lstrip(".")
     source_url = f"{MEDIA_INPUTS_URL}/{job_id}/{SOURCE_BASENAME}.{ext}"
 
-    # Celery 작업 상태 조회, Redis Backend에서 정보 조회
     result = celery.AsyncResult(job_id)
-    status = result.state # PENDING / STARTED / SUCCESS / FAILURE
+    status = result.state
 
     response = {
         "job_id": job_id,
@@ -103,8 +92,6 @@ def get_job(job_id: str):
         "source_url": source_url,
     }
 
-    if status == "SUCCESS":
-        response["hls_url"] = f"{MEDIA_OUTPUTS_URL}/{job_id}/playlist.m3u8"
-    elif status == "FAILURE":
-        response["error"] = "Video encoding failed"
+    if status == "FAILURE":
+        response["error"] = "Background task failed"
     return response
