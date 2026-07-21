@@ -7,16 +7,8 @@ services:
     ports:
       - "8000:8000"
 
-    # 환경변수
-    environment:
-      DATA_ROOT: /data
-      MAX_UPLOAD_BYTES: "104857600" # 100MB
-      ALLOWED_EXTENSIONS: "mp4,mov,webm"
-
     # 볼륨 마운트
-    # 도커 컨테이너 안의 폴더와 내 PC의 폴더를 연결해 줘서 이 폴더를 영구적으로 보존할 수 있게 해줌
     volumes:
-      - ./data:/data
       - ./static:/app/static:ro
 
     # 실행 시 동작할 명령어

@@ -7,7 +7,6 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 VENV_DIR = PROJECT_ROOT / ".venv"
 API_REQUIREMENTS = PROJECT_ROOT / "api" / "requirements.txt"
-DATA_ROOT = PROJECT_ROOT / "data"
 
 
 def run(command: list[str], *, env=None, cwd: Path | None = None) -> None:
@@ -27,13 +26,6 @@ def get_venv_python() -> Path:
     return VENV_DIR / "bin" / "python"
 
 
-def local_env() -> dict[str, str]:
-    return {
-        **os.environ,
-        "DATA_ROOT": str(DATA_ROOT),
-    }
-
-
 def install() -> None:
     """api 의존성을 .venv에 설치"""
     if not VENV_DIR.exists():
@@ -42,7 +34,6 @@ def install() -> None:
 
     py = get_venv_python()
     run([py, "-m", "pip", "install", "-r", API_REQUIREMENTS])
-    DATA_ROOT.mkdir(parents=True, exist_ok=True)
 
 
 def api() -> None:
@@ -58,7 +49,7 @@ def api() -> None:
             "api",
             "--reload",
         ],
-        env=local_env(),
+        env=os.environ.copy(),
     )
 
 

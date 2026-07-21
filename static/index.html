@@ -7,34 +7,28 @@
 </head>
 <body>
   <main>
-    <h1>영상 업로드</h1>
-    <p class="hint">Checkpoint 01: FastAPI로 영상을 받아 저장합니다.</p>
-    <input type="file" id="file" accept="video/*" />
-    <button id="upload">업로드</button>
+    <h1>FastAPI 환경 확인</h1>
+    <p class="hint">Checkpoint 00: FastAPI 앱이 기동되는지 확인합니다.</p>
+    <ul>
+      <li><a href="/docs" target="_blank" rel="noopener">Swagger UI (/docs)</a></li>
+      <li><a href="/api/health" target="_blank" rel="noopener">Health API (/api/health)</a></li>
+    </ul>
     <pre id="result" hidden></pre>
-    <video id="source" controls hidden></video>
   </main>
 
   <script>
-    document.getElementById("upload").onclick = async () => {
-      const file = document.getElementById("file").files[0];
-      if (!file) return alert("파일을 선택하세요");
-
-      const form = new FormData();
-      form.append("file", file);
-
-      const res = await fetch("/api/videos", { method: "POST", body: form });
-      const data = await res.json();
+    (async () => {
       const result = document.getElementById("result");
-      result.textContent = JSON.stringify(data, null, 2);
-      result.hidden = false;
-
-      if (res.ok && data.source_url) {
-        const video = document.getElementById("source");
-        video.src = data.source_url;
-        video.hidden = false;
+      try {
+        const res = await fetch("/api/health");
+        const data = await res.json();
+        result.textContent = JSON.stringify(data, null, 2);
+        result.hidden = false;
+      } catch (error) {
+        result.textContent = String(error);
+        result.hidden = false;
       }
-    };
+    })();
   </script>
 </body>
 </html>
