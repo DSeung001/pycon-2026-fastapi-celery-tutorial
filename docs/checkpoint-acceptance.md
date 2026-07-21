@@ -11,6 +11,22 @@ Use this document when creating or reviewing checkpoint branches. Each branch mu
 - [ ] The README or workshop notes state one clear expected result.
 - [ ] A participant can continue without knowing concepts from a later checkpoint.
 
+## `checkpoint/00-fastapi-setup`
+
+Expected concept: bringing up a minimal FastAPI app and confirming the toolchain.
+
+- [ ] FastAPI starts through Docker Compose.
+- [ ] The static tutorial page is reachable.
+- [ ] `GET /api/health` returns `{"status":"ok"}`.
+- [ ] Swagger UI is reachable at `/docs`.
+- [ ] The participant flow does not require upload, Redis, Celery, or FFmpeg.
+
+Suggested verification:
+
+```bash
+curl -s http://localhost:8000/api/health
+```
+
 ## `checkpoint/01-fastapi-upload`
 
 Expected concept: receiving and storing a video through FastAPI.

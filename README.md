@@ -14,12 +14,13 @@ python scripts/dev.py docker
 
 ```bash
 git fetch origin
-git switch checkpoint/01-fastapi-upload
+git switch checkpoint/00-fastapi-setup
 python scripts/dev.py docker
 ```
 
 | 브랜치 | 학습 내용 | 성공 기준 |
 |--------|-----------|-----------|
+| `checkpoint/00-fastapi-setup` | FastAPI 초기 기동 | `/api/health`와 `/docs` 확인 |
 | `checkpoint/01-fastapi-upload` | FastAPI 업로드와 원본 저장 | `job_id`와 `data/inputs/{job_id}/` 확인 |
 | `checkpoint/02-celery-redis` | Redis enqueue와 상태 조회 | `PENDING` → `SUCCESS`, worker 로그 확인 |
 | `checkpoint/03-ffmpeg-hls` | worker FFmpeg HLS 인코딩 | `playlist.m3u8`와 `hls_url` 확인 |
