@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from app.config import (
+    APP_TITLE,
     INPUTS_DIR,
     MEDIA_INPUTS_URL,
     MEDIA_OUTPUTS_URL,
@@ -10,7 +11,7 @@ from app.config import (
 from app.routes import router as api_router
 
 # FastAPI 앱 인스턴스 생성
-app = FastAPI(title="Pycon 2026 Video Converter")
+app = FastAPI(title=APP_TITLE)
 
 # 라우터 등록
 app.include_router(api_router, prefix="/api")
