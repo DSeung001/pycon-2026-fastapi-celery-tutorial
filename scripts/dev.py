@@ -93,6 +93,8 @@ def worker() -> None:
         print("checkpoint/02-celery-redis 이후에서 사용하세요.")
         sys.exit(1)
     install()
+    # Celery 기본 pool은 prefork(멀티프로세스 fork)라 Windows에서 pool/Permission 에러가 난다.
+    # 튜토리얼은 Win/Mac/Linux 동작을 맞추기 위해 solo(한 프로세스·동시 1작업)를 쓴다.
     run(
         [
             get_venv_python(),
@@ -102,6 +104,7 @@ def worker() -> None:
             "app.celery_app.celery",
             "worker",
             "--loglevel=info",
+            "--pool=solo",
         ],
         env=local_env(),
         cwd=WORKER_DIR,
