@@ -55,5 +55,6 @@ services:
     depends_on:
       redis:
         condition: service_healthy
-    # 실행 파일 지정 및 로그 레벨 설정
-    command: celery -A app.celery_app.celery worker --loglevel=info
+    # Celery 기본 pool은 prefork(멀티프로세스 fork)라 Windows에서 pool/Permission 에러가 난다.
+    # 튜토리얼은 Win/Mac/Linux 동작을 맞추기 위해 solo(한 프로세스·동시 1작업)를 쓴다.
+    command: celery -A app.celery_app.celery worker --loglevel=info --pool=solo
